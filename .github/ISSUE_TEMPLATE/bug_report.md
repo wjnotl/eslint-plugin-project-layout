@@ -32,3 +32,4 @@ A clear and concise description of what you expected to happen.
  - Node.js version: [e.g. 20.9.0]
  - ESLint version: [e.g. 9.0.0]
  - eslint-plugin-project-layout version: [e.g. 1.0.0]
+

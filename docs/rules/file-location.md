@@ -37,7 +37,9 @@ This rule prevents stray files or accidental misplaced modules by enforcing dire
 
 ### Options Reference
 
+- `basePath` (`string`, optional): Base directory path to strip from files before evaluation. Useful in monorepos or ESLint `overrides` so allowed directories can be defined relative to a subpackage. Can be set globally or per pattern.
 - `patterns` (`Array`, required): A list of location rules.
+  - `basePath` (`string`, optional): Pattern-specific base path override.
   - `files` (`string`, required): Glob pattern indicating which files this constraint applies to.
   - `allowedDirectories` (`string[]`, required): List of glob patterns matching directories where the matched files are permitted to reside. At least one allowed directory pattern must match the file's parent directory path.
 
@@ -86,3 +88,4 @@ This rule prevents stray files or accidental misplaced modules by enforcing dire
 
 #### Incorrect:
 - `src/modules/users/001-init.migration.ts`
+

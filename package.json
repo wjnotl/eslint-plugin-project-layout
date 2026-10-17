@@ -34,16 +34,16 @@
     "directory-structure",
     "naming-conventions"
   ],
-  "author": "",
+  "author": "Liew Wen Jing",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/USERNAME/eslint-plugin-project-layout.git"
+    "url": "https://github.com/wjnotl/eslint-plugin-project-layout.git"
   },
   "bugs": {
-    "url": "https://github.com/USERNAME/eslint-plugin-project-layout/issues"
+    "url": "https://github.com/wjnotl/eslint-plugin-project-layout/issues"
   },
-  "homepage": "https://github.com/USERNAME/eslint-plugin-project-layout#readme",
+  "homepage": "https://github.com/wjnotl/eslint-plugin-project-layout#readme",
   "peerDependencies": {
     "eslint": ">=8.0.0"
   },

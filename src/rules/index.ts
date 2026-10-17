@@ -7,3 +7,4 @@ export const rules = {
 };
 
 export { filenamePattern, fileLocation };
+

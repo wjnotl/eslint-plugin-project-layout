@@ -1,5 +1,5 @@
 import type { Rule } from "eslint";
-import type { FilenamePatternOptions } from "../types";
+import type { FilenamePatternOptions, FilenamePatternRuleItem } from "../types";
 import { matchesGlob } from "../utils/glob";
 import { getDirectoryAtLevel, getFilename, getRelativePath } from "../utils/path";
 import { getComparisonValue, relationshipMatches } from "../utils/relationship";
@@ -17,12 +17,18 @@ const rule: Rule.RuleModule = {
         type: "object",
         required: ["patterns"],
         properties: {
+          basePath: {
+            type: "string",
+          },
           patterns: {
             type: "array",
             items: {
               type: "object",
               required: ["files", "filename"],
               properties: {
+                basePath: {
+                  type: "string",
+                },
                 files: {
                   type: "string",
                   minLength: 1,
@@ -87,16 +93,27 @@ const rule: Rule.RuleModule = {
 
   create(context: Rule.RuleContext) {
     const config: FilenamePatternOptions = context.options[0] ?? { patterns: [] };
-    const filepath = getRelativePath(context);
-    const filename = getFilename(filepath);
 
-    const matchedPattern = config.patterns.find((pattern) =>
-      matchesGlob(pattern.files, filepath)
-    );
+    let matchedPattern: FilenamePatternRuleItem | undefined;
+    let matchedFilepath = "";
+
+    for (const pattern of config.patterns) {
+      const effectiveBasePath = pattern.basePath ?? config.basePath;
+      const filepath = getRelativePath(context, effectiveBasePath);
+
+      if (matchesGlob(pattern.files, filepath)) {
+        matchedPattern = pattern;
+        matchedFilepath = filepath;
+        break;
+      }
+    }
 
     if (!matchedPattern) {
       return {};
     }
+
+    const filepath = matchedFilepath;
+    const filename = getFilename(filepath);
 
     let filenameRegex: RegExp;
 
@@ -109,7 +126,7 @@ const rule: Rule.RuleModule = {
             node,
             messageId: "invalidRegex",
             data: {
-              regex: matchedPattern.filename.regex,
+              regex: matchedPattern!.filename.regex,
             },
           });
         },
@@ -125,7 +142,7 @@ const rule: Rule.RuleModule = {
             messageId: "invalidFilename",
             data: {
               filename,
-              regex: matchedPattern.filename.regex,
+              regex: matchedPattern!.filename.regex,
             },
           });
 
@@ -134,7 +151,7 @@ const rule: Rule.RuleModule = {
         }
 
         // File name must satisfy each configured relationship with its directory path
-        for (const relationship of matchedPattern.relationships ?? []) {
+        for (const relationship of matchedPattern!.relationships ?? []) {
           const directory = getDirectoryAtLevel(filepath, relationship.level);
 
           if (relationship.target !== "directory" || directory === null) {

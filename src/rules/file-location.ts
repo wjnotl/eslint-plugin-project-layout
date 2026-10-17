@@ -1,5 +1,5 @@
 import type { Rule } from "eslint";
-import type { FileLocationOptions } from "../types";
+import type { FileLocationOptions, FileLocationRuleItem } from "../types";
 import { matchesGlob } from "../utils/glob";
 import { getDirectory, getFilename, getRelativePath } from "../utils/path";
 
@@ -16,12 +16,18 @@ const rule: Rule.RuleModule = {
         type: "object",
         required: ["patterns"],
         properties: {
+          basePath: {
+            type: "string",
+          },
           patterns: {
             type: "array",
             items: {
               type: "object",
               required: ["files", "allowedDirectories"],
               properties: {
+                basePath: {
+                  type: "string",
+                },
                 files: {
                   type: "string",
                   minLength: 1,
@@ -50,17 +56,28 @@ const rule: Rule.RuleModule = {
 
   create(context: Rule.RuleContext) {
     const config: FileLocationOptions = context.options[0] ?? { patterns: [] };
-    const filepath = getRelativePath(context);
-    const filename = getFilename(filepath);
-    const directory = getDirectory(filepath);
 
-    const matchedPattern = config.patterns.find((pattern) =>
-      matchesGlob(pattern.files, filepath)
-    );
+    let matchedPattern: FileLocationRuleItem | undefined;
+    let matchedFilepath = "";
+
+    for (const pattern of config.patterns) {
+      const effectiveBasePath = pattern.basePath ?? config.basePath;
+      const filepath = getRelativePath(context, effectiveBasePath);
+
+      if (matchesGlob(pattern.files, filepath)) {
+        matchedPattern = pattern;
+        matchedFilepath = filepath;
+        break;
+      }
+    }
 
     if (!matchedPattern) {
       return {};
     }
+
+    const filepath = matchedFilepath;
+    const filename = getFilename(filepath);
+    const directory = getDirectory(filepath);
 
     const isAllowed = matchedPattern.allowedDirectories.some((allowedDirectory) =>
       matchesGlob(allowedDirectory, directory)
@@ -78,7 +95,7 @@ const rule: Rule.RuleModule = {
           data: {
             filename,
             directory,
-            allowedDirectories: matchedPattern.allowedDirectories.join(", "),
+            allowedDirectories: matchedPattern!.allowedDirectories.join(", "),
           },
         });
       },

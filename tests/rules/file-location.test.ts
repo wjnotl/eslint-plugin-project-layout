@@ -52,6 +52,22 @@ ruleTester.run("file-location", fileLocation, {
         },
       ],
     },
+    {
+      // Monorepo / override scenario with basePath
+      code: "const x = 1;",
+      filename: "packages/ui/tests/Button.test.ts",
+      options: [
+        {
+          basePath: "packages/ui",
+          patterns: [
+            {
+              files: "**/*.test.ts",
+              allowedDirectories: ["tests/**"],
+            },
+          ],
+        },
+      ],
+    },
   ],
   invalid: [
     {
@@ -76,3 +92,4 @@ ruleTester.run("file-location", fileLocation, {
     },
   ],
 });
+

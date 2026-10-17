@@ -82,3 +82,4 @@ export function matchesGlob(glob: string, filepath: string): boolean {
 
   return false;
 }
+

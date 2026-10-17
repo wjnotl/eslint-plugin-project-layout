@@ -11,6 +11,8 @@ export interface RelationshipConfig {
 }
 
 export interface FilenamePatternRuleItem {
+  /** Optional base path to strip from the file path before evaluation */
+  basePath?: string;
   files: string;
   filename: {
     regex: string;
@@ -19,14 +21,20 @@ export interface FilenamePatternRuleItem {
 }
 
 export interface FilenamePatternOptions {
+  /** Optional global base path for all patterns in this config block */
+  basePath?: string;
   patterns: FilenamePatternRuleItem[];
 }
 
 export interface FileLocationRuleItem {
+  /** Optional base path to strip from the file path before evaluation */
+  basePath?: string;
   files: string;
   allowedDirectories: string[];
 }
 
 export interface FileLocationOptions {
+  /** Optional global base path for all patterns in this config block */
+  basePath?: string;
   patterns: FileLocationRuleItem[];
 }

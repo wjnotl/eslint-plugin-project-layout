@@ -38,6 +38,21 @@ describe("path utils", () => {
       };
       expect(getRelativePath(context)).toBe("src/index.ts");
     });
+
+    it("strips basePath when provided", () => {
+      const context = {
+        filename: "C:/projects/monorepo/packages/ui/src/Button.tsx",
+        cwd: "C:/projects/monorepo",
+      };
+      expect(getRelativePath(context, "packages/ui")).toBe("src/Button.tsx");
+    });
+
+    it("strips basePath when filename is already relative", () => {
+      const context = {
+        filename: "packages/ui/src/Button.tsx",
+      };
+      expect(getRelativePath(context, "packages/ui")).toBe("src/Button.tsx");
+    });
   });
 
   describe("getFilename", () => {
@@ -75,3 +90,4 @@ describe("path utils", () => {
     });
   });
 });
+

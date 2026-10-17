@@ -14,3 +14,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ESLint Flat Config (`eslint.config.js`) support and legacy config backwards compatibility.
 - Comprehensive unit tests with Vitest and ESLint `RuleTester`.
 - Full TypeScript declarations and type definitions exported.
+

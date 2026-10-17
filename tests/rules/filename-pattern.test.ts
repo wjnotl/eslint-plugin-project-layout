@@ -46,6 +46,31 @@ ruleTester.run("filename-pattern", filenamePattern, {
         },
       ],
     },
+    {
+      // Monorepo / override scenario with basePath
+      code: "const x = 1;",
+      filename: "packages/ui/src/components/Button/Button.tsx",
+      options: [
+        {
+          basePath: "packages/ui",
+          patterns: [
+            {
+              files: "src/components/**/*.tsx",
+              filename: { regex: "^[A-Z][a-zA-Z0-9]+\\.tsx$" },
+              relationships: [
+                {
+                  target: "directory",
+                  level: 1,
+                  comparison: "equals",
+                  value: "filename-stem",
+                  removeSuffix: [".tsx"],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
   ],
   invalid: [
     {
@@ -99,3 +124,4 @@ ruleTester.run("filename-pattern", filenamePattern, {
     },
   ],
 });
+

@@ -51,7 +51,9 @@ This rule enforces regex naming conventions for targeted files, with optional ve
 
 ### Options Reference
 
+- `basePath` (`string`, optional): Base directory path to strip from files before evaluation. Useful in monorepos or ESLint `overrides` so pattern paths can be written relative to a subpackage rather than the workspace root. Can be defined globally or per pattern.
 - `patterns` (`Array`, required): A list of pattern rules to evaluate against project files.
+  - `basePath` (`string`, optional): Pattern-specific base path override.
   - `files` (`string`, required): Glob pattern identifying which files this pattern applies to.
   - `filename.regex` (`string`, required): Regular expression that the filename (basename) must match.
   - `relationships` (`Array`, optional): Rules asserting a relationship between the filename and its surrounding directory hierarchy:
@@ -125,3 +127,34 @@ Enforce that utility files must be kebab-case:
 #### Incorrect:
 - `src/utils/formatDate.ts`
 - `src/utils/StringHelpers.ts`
+
+### 3. Monorepos & ESLint Overrides (`basePath`)
+
+When running ESLint from the root of a monorepo, files in `packages/ui` have paths like `packages/ui/src/components/...`.
+You can use `basePath` so that rules inside package overrides can write paths relative to that package:
+
+```json
+{
+  "basePath": "packages/ui",
+  "patterns": [
+    {
+      "files": "src/components/**/*.tsx",
+      "filename": { "regex": "^[A-Z][a-zA-Z0-9]+\\.tsx$" }
+    }
+  ]
+}
+```
+
+Or without `basePath`, simply use glob wildcards:
+```json
+{
+  "patterns": [
+    {
+      "files": "**/src/components/**/*.tsx",
+      "filename": { "regex": "^[A-Z][a-zA-Z0-9]+\\.tsx$" }
+    }
+  ]
+}
+```
+
+

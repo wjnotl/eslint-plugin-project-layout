@@ -2,7 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/eslint-plugin-project-layout.svg)](https://www.npmjs.com/package/eslint-plugin-project-layout)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Node.js CI](https://github.com/USERNAME/eslint-plugin-project-layout/actions/workflows/ci.yml/badge.svg)](https://github.com/USERNAME/eslint-plugin-project-layout/actions)
+[![Node.js CI](https://github.com/wjnotl/eslint-plugin-project-layout/actions/workflows/ci.yml/badge.svg)](https://github.com/wjnotl/eslint-plugin-project-layout/actions)
 
 An ESLint plugin to enforce directory layouts, file locations, and filename conventions across your codebase.
 
@@ -204,3 +204,4 @@ Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for de
 ## License
 
 [MIT](LICENSE) © 2026
+
