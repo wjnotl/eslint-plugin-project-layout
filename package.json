@@ -1,0 +1,60 @@
+{
+  "name": "eslint-plugin-project-layout",
+  "version": "1.0.0",
+  "description": "ESLint plugin to enforce project directory layouts, file locations, and filename conventions.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "eslint",
+    "eslintplugin",
+    "eslint-plugin",
+    "project-layout",
+    "folder-structure",
+    "file-structure",
+    "architecture",
+    "directory-structure",
+    "naming-conventions"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/USERNAME/eslint-plugin-project-layout.git"
+  },
+  "bugs": {
+    "url": "https://github.com/USERNAME/eslint-plugin-project-layout/issues"
+  },
+  "homepage": "https://github.com/USERNAME/eslint-plugin-project-layout#readme",
+  "peerDependencies": {
+    "eslint": ">=8.0.0"
+  },
+  "devDependencies": {
+    "@types/eslint": "^9.6.1",
+    "@types/node": "^26.6.5",
+    "eslint": "^10.13.0",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

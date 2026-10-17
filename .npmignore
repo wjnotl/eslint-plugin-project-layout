@@ -1,0 +1,19 @@
+# Source & tests (only dist is published)
+src/
+tests/
+docs/
+.github/
+
+# Config files
+tsconfig*.json
+vitest.config.ts
+.editorconfig
+.eslintrc*
+eslint.config.*
+
+# Development & git files
+.git/
+.gitignore
+.npmignore
+*.log
+coverage/
