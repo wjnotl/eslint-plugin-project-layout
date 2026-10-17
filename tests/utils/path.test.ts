@@ -90,4 +90,3 @@ describe("path utils", () => {
     });
   });
 });
-

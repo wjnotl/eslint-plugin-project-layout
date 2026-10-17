@@ -1,14 +1,19 @@
 import type { Rule } from "eslint";
 import type { FilenamePatternOptions, FilenamePatternRuleItem } from "../types";
 import { matchesGlob } from "../utils/glob";
-import { getDirectoryAtLevel, getFilename, getRelativePath } from "../utils/path";
+import {
+  getDirectoryAtLevel,
+  getFilename,
+  getRelativePath,
+} from "../utils/path";
 import { getComparisonValue, relationshipMatches } from "../utils/relationship";
 
 const rule: Rule.RuleModule = {
   meta: {
     type: "problem",
     docs: {
-      description: "Validate filename patterns and configurable filename-path relationships",
+      description:
+        "Validate filename patterns and configurable filename-path relationships",
       recommended: false,
       url: "https://github.com/USERNAME/eslint-plugin-project-layout/blob/main/docs/rules/filename-pattern.md",
     },
@@ -82,7 +87,8 @@ const rule: Rule.RuleModule = {
       },
     ],
     messages: {
-      invalidFilename: 'Filename "{{filename}}" does not match the required pattern "{{regex}}".',
+      invalidFilename:
+        'Filename "{{filename}}" does not match the required pattern "{{regex}}".',
       invalidRelationship:
         'Filename "{{filename}}" does not satisfy its relationship with directory "{{directory}}".',
       invalidRelationshipConfig:
@@ -92,7 +98,9 @@ const rule: Rule.RuleModule = {
   },
 
   create(context: Rule.RuleContext) {
-    const config: FilenamePatternOptions = context.options[0] ?? { patterns: [] };
+    const config: FilenamePatternOptions = context.options[0] ?? {
+      patterns: [],
+    };
 
     let matchedPattern: FilenamePatternRuleItem | undefined;
     let matchedFilepath = "";

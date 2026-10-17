@@ -25,14 +25,17 @@ describe("glob utils", () => {
 
   describe("matchesGlob", () => {
     it("matches glob path patterns with slashes", () => {
-      expect(matchesGlob("src/**/*.tsx", "src/components/Button.tsx")).toBe(true);
+      expect(matchesGlob("src/**/*.tsx", "src/components/Button.tsx")).toBe(
+        true
+      );
       expect(matchesGlob("src/**/*.tsx", "test/Button.tsx")).toBe(false);
     });
 
     it("matches pattern without slashes against basename", () => {
-      expect(matchesGlob("*.test.ts", "src/components/button.test.ts")).toBe(true);
+      expect(matchesGlob("*.test.ts", "src/components/button.test.ts")).toBe(
+        true
+      );
       expect(matchesGlob("*.test.ts", "src/components/button.ts")).toBe(false);
     });
   });
 });
-

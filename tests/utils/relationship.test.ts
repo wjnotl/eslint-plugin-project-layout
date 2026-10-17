@@ -39,9 +39,10 @@ describe("relationship utils", () => {
 
     it("checks regex matching", () => {
       expect(relationshipMatches("Button", "^Button$", "matches")).toBe(true);
-      expect(relationshipMatches("MyButton", "^Button$", "matches")).toBe(false);
+      expect(relationshipMatches("MyButton", "^Button$", "matches")).toBe(
+        false
+      );
       expect(relationshipMatches("button", "Button", "matches")).toBe(false);
     });
   });
 });
-

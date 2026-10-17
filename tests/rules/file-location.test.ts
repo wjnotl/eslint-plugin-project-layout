@@ -92,4 +92,3 @@ ruleTester.run("file-location", fileLocation, {
     },
   ],
 });
-

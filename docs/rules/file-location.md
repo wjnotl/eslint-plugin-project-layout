@@ -5,6 +5,7 @@ Ensure files are stored strictly within allowed directories.
 ## Motivation
 
 In clean architecture and modular codebases, certain types of files belong in specific folders. For instance:
+
 - Test files (`*.test.ts`, `*.spec.ts`) should only live under `tests/**` or `src/**/__tests__`.
 - API route handlers should only be placed under `src/routes/**` or `app/api/**`.
 - Database migrations should only exist inside `src/db/migrations/**`.
@@ -24,14 +25,11 @@ This rule prevents stray files or accidental misplaced modules by enforcing dire
           "files": "**/*.test.ts",
 
           // Array of allowed directory glob patterns
-          "allowedDirectories": [
-            "tests/**",
-            "src/**/__tests__"
-          ]
-        }
-      ]
-    }
-  ]
+          "allowedDirectories": ["tests/**", "src/**/__tests__"],
+        },
+      ],
+    },
+  ],
 }
 ```
 
@@ -52,20 +50,19 @@ This rule prevents stray files or accidental misplaced modules by enforcing dire
   "patterns": [
     {
       "files": "**/*.test.{ts,tsx}",
-      "allowedDirectories": [
-        "tests/**",
-        "src/**/__tests__"
-      ]
+      "allowedDirectories": ["tests/**", "src/**/__tests__"]
     }
   ]
 }
 ```
 
 #### Correct:
+
 - `tests/unit/auth.test.ts`
 - `src/components/__tests__/Button.test.ts`
 
 #### Incorrect:
+
 - `src/components/Button.test.ts` (Not inside an allowed directory)
 
 ### 2. Restrict Migration Scripts
@@ -75,17 +72,16 @@ This rule prevents stray files or accidental misplaced modules by enforcing dire
   "patterns": [
     {
       "files": "**/*.migration.ts",
-      "allowedDirectories": [
-        "src/database/migrations"
-      ]
+      "allowedDirectories": ["src/database/migrations"]
     }
   ]
 }
 ```
 
 #### Correct:
+
 - `src/database/migrations/001-init.migration.ts`
 
 #### Incorrect:
-- `src/modules/users/001-init.migration.ts`
 
+- `src/modules/users/001-init.migration.ts`

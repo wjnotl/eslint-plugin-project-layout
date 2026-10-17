@@ -119,17 +119,19 @@ module.exports = {
 
 ## Rules
 
-| Rule | Description | Recommended |
-| :--- | :--- | :---: |
+| Rule                                                                | Description                                                                 |   Recommended   |
+| :------------------------------------------------------------------ | :-------------------------------------------------------------------------- | :-------------: |
 | [`project-layout/filename-pattern`](docs/rules/filename-pattern.md) | Enforce filename regex patterns and optional parent directory relationships | ⚠️ Configurable |
-| [`project-layout/file-location`](docs/rules/file-location.md) | Ensure matching files only reside within approved directories | ⚠️ Configurable |
+| [`project-layout/file-location`](docs/rules/file-location.md)       | Ensure matching files only reside within approved directories               | ⚠️ Configurable |
 
 ---
 
 ## Configuration Recipes
 
 ### 1. React Component Folders
+
 Ensure that each component lives in its own directory named identically to the component:
+
 - `src/components/Button/Button.tsx` ✅
 - `src/components/Button/Modal.tsx` ❌
 
@@ -161,6 +163,7 @@ Ensure that each component lives in its own directory named identically to the c
 ```
 
 ### 2. Strict Test File Locations
+
 Disallow stray unit tests in feature folders:
 
 ```json
@@ -204,4 +207,3 @@ Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for de
 ## License
 
 [MIT](LICENSE) © 2026
-

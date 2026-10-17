@@ -21,6 +21,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "prepare": "npm run build"
   },
   "keywords": [
@@ -51,6 +53,7 @@
     "@types/eslint": "^9.6.1",
     "@types/node": "^26.6.5",
     "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
     "typescript": "^7.0.2",
     "vitest": "^5.0.5"
   },

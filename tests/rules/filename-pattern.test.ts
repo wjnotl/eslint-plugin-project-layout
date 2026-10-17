@@ -124,4 +124,3 @@ ruleTester.run("filename-pattern", filenamePattern, {
     },
   ],
 });
-

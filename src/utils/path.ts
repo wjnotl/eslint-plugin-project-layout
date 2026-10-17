@@ -74,7 +74,10 @@ export function getDirectory(filepath: string): string {
  * Level 1 is the immediate parent directory.
  * Level 2 is the grandparent directory, etc.
  */
-export function getDirectoryAtLevel(filepath: string, level: number): string | null {
+export function getDirectoryAtLevel(
+  filepath: string,
+  level: number
+): string | null {
   const dir = getDirectory(filepath);
   const segments = dir.split("/");
 

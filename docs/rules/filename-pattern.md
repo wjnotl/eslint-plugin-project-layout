@@ -5,6 +5,7 @@ Validate file naming conventions and enforce structural relationships between fi
 ## Motivation
 
 In large codebases, maintaining naming consistency and directory structure is critical. Common issues include:
+
 - A component file named `button.tsx` instead of `Button.tsx`.
 - Component folders where the file name does not match the folder name (e.g. `src/components/Modal/Dialog.tsx`).
 - Inconsistent file naming across domains, features, or architectural layers.
@@ -25,7 +26,7 @@ This rule enforces regex naming conventions for targeted files, with optional ve
 
           // Required filename regex
           "filename": {
-            "regex": "^[A-Z][a-zA-Z0-9]+\\.tsx$"
+            "regex": "^[A-Z][a-zA-Z0-9]+\\.tsx$",
           },
 
           // Optional directory relationship checks
@@ -39,13 +40,13 @@ This rule enforces regex naming conventions for targeted files, with optional ve
               // "filename" (full name) or "filename-stem" (name minus removeSuffix)
               "value": "filename-stem",
               // Suffixes to strip when computing the stem
-              "removeSuffix": [".tsx", ".component.tsx"]
-            }
-          ]
-        }
-      ]
-    }
-  ]
+              "removeSuffix": [".tsx", ".component.tsx"],
+            },
+          ],
+        },
+      ],
+    },
+  ],
 }
 ```
 
@@ -96,10 +97,12 @@ Enforce that component files inside `src/components/<ComponentName>/` must be na
 ```
 
 #### Correct:
+
 - `src/components/Button/Button.tsx`
 - `src/components/Modal/Modal.tsx`
 
 #### Incorrect:
+
 - `src/components/button.tsx` (Fails regex)
 - `src/components/Header/Button.tsx` (Fails relationship: `Button` != `Header`)
 
@@ -121,10 +124,12 @@ Enforce that utility files must be kebab-case:
 ```
 
 #### Correct:
+
 - `src/utils/format-date.ts`
 - `src/utils/string-helpers.ts`
 
 #### Incorrect:
+
 - `src/utils/formatDate.ts`
 - `src/utils/StringHelpers.ts`
 
@@ -146,6 +151,7 @@ You can use `basePath` so that rules inside package overrides can write paths re
 ```
 
 Or without `basePath`, simply use glob wildcards:
+
 ```json
 {
   "patterns": [
@@ -156,5 +162,3 @@ Or without `basePath`, simply use glob wildcards:
   ]
 }
 ```
-
-

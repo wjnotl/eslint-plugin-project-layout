@@ -79,8 +79,8 @@ const rule: Rule.RuleModule = {
     const filename = getFilename(filepath);
     const directory = getDirectory(filepath);
 
-    const isAllowed = matchedPattern.allowedDirectories.some((allowedDirectory) =>
-      matchesGlob(allowedDirectory, directory)
+    const isAllowed = matchedPattern.allowedDirectories.some(
+      (allowedDirectory) => matchesGlob(allowedDirectory, directory)
     );
 
     if (isAllowed) {

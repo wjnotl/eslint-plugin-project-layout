@@ -50,4 +50,3 @@ export * from "./utils/path";
 export * from "./utils/relationship";
 
 export default plugin;
-

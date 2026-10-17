@@ -5,22 +5,26 @@ Thank you for considering contributing! We welcome bug reports, documentation up
 ## Development Setup
 
 1. **Clone the repository**:
+
    ```bash
    git clone https://github.com/wjnotl/eslint-plugin-project-layout.git
    cd eslint-plugin-project-layout
    ```
 
 2. **Install dependencies**:
+
    ```bash
    npm install
    ```
 
 3. **Build the project**:
+
    ```bash
    npm run build
    ```
 
 4. **Run tests**:
+
    ```bash
    npm test
    ```
@@ -43,4 +47,3 @@ Thank you for considering contributing! We welcome bug reports, documentation up
 2. Commit your changes with clear, descriptive commit messages.
 3. Push to your branch and open a Pull Request.
 4. Ensure all CI tests pass.
-
