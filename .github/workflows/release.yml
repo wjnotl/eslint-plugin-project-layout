@@ -8,7 +8,7 @@ on:
 
 jobs:
   publish:
-    name: Publish to npm
+    name: Stage & Publish to npm
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -21,7 +21,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
-          node-version: "22.x"
+          node-version: "24.x"
           registry-url: "https://registry.npmjs.org"
           cache: "npm"
 
@@ -36,10 +36,10 @@ jobs:
       - name: Build package
         run: npm run build
 
-      - name: Publish to npm
-        run: npm publish --access public --provenance
-        # No NODE_AUTH_TOKEN needed! npm automatically authenticates via OIDC
-        # once Trusted Publishing is linked on npmjs.com.
+      - name: Stage package to npm
+        run: npm stage publish --access public --provenance
+        # Staged publishing: uploads to npm staging queue.
+        # Approve manually on npmjs.com or via 'npm stage approve'.
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/v')
