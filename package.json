@@ -40,7 +40,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/wjnotl/eslint-plugin-project-layout.git"
+    "url": "git+https://github.com/wjnotl/eslint-plugin-project-layout.git"
   },
   "bugs": {
     "url": "https://github.com/wjnotl/eslint-plugin-project-layout/issues"
