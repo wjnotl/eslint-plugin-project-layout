@@ -1,6 +1,6 @@
 import type { Rule } from "eslint";
 import type { FileLocationOptions, FileLocationRuleItem } from "../types";
-import { matchesGlob } from "../utils/glob";
+import { matchesAnyDirectoryPattern, matchesAnyGlob } from "../utils/glob";
 import { getDirectory, getFilename, getRelativePath } from "../utils/path";
 
 const rule: Rule.RuleModule = {
@@ -9,7 +9,7 @@ const rule: Rule.RuleModule = {
     docs: {
       description: "Ensure files are stored in configured allowed directories",
       recommended: false,
-      url: "https://github.com/USERNAME/eslint-plugin-project-layout/blob/main/docs/rules/file-location.md",
+      url: "https://github.com/wjnotl/eslint-plugin-project-layout/blob/main/docs/rules/file-location.md",
     },
     schema: [
       {
@@ -19,26 +19,56 @@ const rule: Rule.RuleModule = {
           basePath: {
             type: "string",
           },
+          ignoredFiles: {
+            oneOf: [
+              { type: "string" },
+              { type: "array", items: { type: "string" } },
+            ],
+          },
           patterns: {
             type: "array",
             items: {
               type: "object",
-              required: ["files", "allowedDirectories"],
+              required: ["files"],
               properties: {
                 basePath: {
                   type: "string",
                 },
                 files: {
-                  type: "string",
-                  minLength: 1,
+                  oneOf: [
+                    { type: "string", minLength: 1 },
+                    {
+                      type: "array",
+                      minItems: 1,
+                      items: { type: "string", minLength: 1 },
+                    },
+                  ],
                 },
-                allowedDirectories: {
-                  type: "array",
-                  minItems: 1,
-                  items: {
-                    type: "string",
-                    minLength: 1,
-                  },
+                ignoredFiles: {
+                  oneOf: [
+                    { type: "string" },
+                    { type: "array", items: { type: "string" } },
+                  ],
+                },
+                allowedDirs: {
+                  oneOf: [
+                    { type: "string", minLength: 1 },
+                    {
+                      type: "array",
+                      minItems: 1,
+                      items: { type: "string", minLength: 1 },
+                    },
+                  ],
+                },
+                disallowedDirs: {
+                  oneOf: [
+                    { type: "string", minLength: 1 },
+                    {
+                      type: "array",
+                      minItems: 1,
+                      items: { type: "string", minLength: 1 },
+                    },
+                  ],
                 },
               },
               additionalProperties: false,
@@ -50,12 +80,22 @@ const rule: Rule.RuleModule = {
     ],
     messages: {
       invalidLocation:
-        'File "{{filename}}" is in "{{directory}}", which is not an allowed directory. Allowed directories: {{allowedDirectories}}.',
+        'File "{{filename}}" is in "{{directory}}", which is not an allowed directory. Allowed directories: {{allowedDirs}}.',
+      disallowedLocation:
+        'File "{{filename}}" is in "{{directory}}", which is a disallowed directory.',
     },
   },
 
   create(context: Rule.RuleContext) {
     const config: FileLocationOptions = context.options[0] ?? { patterns: [] };
+
+    // Check global ignoredFiles
+    if (config.ignoredFiles) {
+      const globalFilepath = getRelativePath(context, config.basePath);
+      if (matchesAnyGlob(config.ignoredFiles, globalFilepath)) {
+        return {};
+      }
+    }
 
     let matchedPattern: FileLocationRuleItem | undefined;
     let matchedFilepath = "";
@@ -64,7 +104,15 @@ const rule: Rule.RuleModule = {
       const effectiveBasePath = pattern.basePath ?? config.basePath;
       const filepath = getRelativePath(context, effectiveBasePath);
 
-      if (matchesGlob(pattern.files, filepath)) {
+      if (matchesAnyGlob(pattern.files, filepath)) {
+        // Check pattern-specific ignoredFiles
+        if (
+          pattern.ignoredFiles &&
+          matchesAnyGlob(pattern.ignoredFiles, filepath)
+        ) {
+          continue;
+        }
+
         matchedPattern = pattern;
         matchedFilepath = filepath;
         break;
@@ -79,27 +127,51 @@ const rule: Rule.RuleModule = {
     const filename = getFilename(filepath);
     const directory = getDirectory(filepath);
 
-    const isAllowed = matchedPattern.allowedDirectories.some(
-      (allowedDirectory) => matchesGlob(allowedDirectory, directory)
-    );
+    const disallowed = matchedPattern.disallowedDirs;
+    const allowed = matchedPattern.allowedDirs;
 
-    if (isAllowed) {
-      return {};
+    // Check disallowedDirs first
+    if (disallowed && matchesAnyDirectoryPattern(disallowed, directory)) {
+      return {
+        Program(node) {
+          context.report({
+            node,
+            messageId: "disallowedLocation",
+            data: {
+              filename,
+              directory,
+            },
+          });
+        },
+      };
     }
 
-    return {
-      Program(node) {
-        context.report({
-          node,
-          messageId: "invalidLocation",
-          data: {
-            filename,
-            directory,
-            allowedDirectories: matchedPattern!.allowedDirectories.join(", "),
+    // Check allowedDirs
+    if (allowed) {
+      const isAllowed = matchesAnyDirectoryPattern(allowed, directory);
+
+      if (!isAllowed) {
+        const allowedDirsText = Array.isArray(allowed)
+          ? allowed.join(", ")
+          : allowed;
+
+        return {
+          Program(node) {
+            context.report({
+              node,
+              messageId: "invalidLocation",
+              data: {
+                filename,
+                directory,
+                allowedDirs: allowedDirsText,
+              },
+            });
           },
-        });
-      },
-    };
+        };
+      }
+    }
+
+    return {};
   },
 };
 

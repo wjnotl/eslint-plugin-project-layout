@@ -11,22 +11,17 @@ export interface ESLintPlugin {
   rules: Record<string, Rule.RuleModule>;
   configs: {
     recommended: Record<string, unknown>;
-    "recommended-legacy": Record<string, unknown>;
     [key: string]: unknown;
   };
 }
 
 const meta: PluginMeta = {
   name: "eslint-plugin-project-layout",
-  version: "1.0.0",
+  version: "1.1.0",
 };
 
 const configs: ESLintPlugin["configs"] = {
   recommended: {},
-  "recommended-legacy": {
-    plugins: ["project-layout"],
-    rules: {},
-  },
 };
 
 const plugin: ESLintPlugin = {
@@ -45,8 +40,8 @@ configs.recommended = {
 
 export { meta, configs, rules, filenamePattern, fileLocation, plugin };
 export * from "./types";
+export * from "./utils/casing";
 export * from "./utils/glob";
 export * from "./utils/path";
-export * from "./utils/relationship";
 
 export default plugin;

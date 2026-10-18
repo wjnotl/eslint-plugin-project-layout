@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-project-layout",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "ESLint plugin to enforce project directory layouts, file locations, and filename conventions.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

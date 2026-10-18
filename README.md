@@ -51,25 +51,17 @@ export default [
       "project-layout": projectLayout,
     },
     rules: {
-      // 1. Enforce filename patterns and folder relationships
+      // 1. Enforce filename patterns and explicit directory variables
       "project-layout/filename-pattern": [
         "error",
         {
           patterns: [
             {
               files: "src/components/**/*.tsx",
-              filename: {
-                regex: "^[A-Z][a-zA-Z0-9]+\\.tsx$",
+              dirs: {
+                component: { level: 1 },
               },
-              relationships: [
-                {
-                  target: "directory",
-                  level: 1, // immediate parent folder
-                  comparison: "equals",
-                  value: "filename-stem",
-                  removeSuffix: [".tsx"],
-                },
-              ],
+              filenameRegex: "^{component}\\.tsx$",
             },
           ],
         },
@@ -81,8 +73,8 @@ export default [
         {
           patterns: [
             {
-              files: "**/*.test.ts",
-              allowedDirectories: ["tests/**", "src/**/__tests__"],
+              files: ["**/*.test.ts", "**/*.spec.ts"],
+              allowedDirs: ["tests/**", "src/**/__tests__"],
             },
           ],
         },
@@ -104,9 +96,7 @@ module.exports = {
         patterns: [
           {
             files: "src/components/**/*.tsx",
-            filename: {
-              regex: "^[A-Z][a-zA-Z0-9]+\\.tsx$",
-            },
+            filenameRegex: "^[A-Z][a-zA-Z0-9]+\\.tsx$",
           },
         ],
       },
@@ -119,10 +109,10 @@ module.exports = {
 
 ## Rules
 
-| Rule                                                                | Description                                                                 |   Recommended   |
-| :------------------------------------------------------------------ | :-------------------------------------------------------------------------- | :-------------: |
-| [`project-layout/filename-pattern`](docs/rules/filename-pattern.md) | Enforce filename regex patterns and optional parent directory relationships | ⚠️ Configurable |
-| [`project-layout/file-location`](docs/rules/file-location.md)       | Ensure matching files only reside within approved directories               | ⚠️ Configurable |
+| Rule                                                                | Description                                                       |   Recommended   |
+| :------------------------------------------------------------------ | :---------------------------------------------------------------- | :-------------: |
+| [`project-layout/filename-pattern`](docs/rules/filename-pattern.md) | Enforce filename regex patterns with explicit directory variables | ⚠️ Configurable |
+| [`project-layout/file-location`](docs/rules/file-location.md)       | Ensure matching files only reside within approved directories     | ⚠️ Configurable |
 
 ---
 
@@ -144,16 +134,10 @@ Ensure that each component lives in its own directory named identically to the c
         "patterns": [
           {
             "files": "src/components/**/*.tsx",
-            "filename": { "regex": "^[A-Z][a-zA-Z0-9]+\\.tsx$" },
-            "relationships": [
-              {
-                "target": "directory",
-                "level": 1,
-                "comparison": "equals",
-                "value": "filename-stem",
-                "removeSuffix": [".tsx"]
-              }
-            ]
+            "dirs": {
+              "component": { "level": 1 }
+            },
+            "filenameRegex": "^{component}\\.tsx$"
           }
         ]
       }
@@ -175,7 +159,7 @@ Disallow stray unit tests in feature folders:
         "patterns": [
           {
             "files": "**/*.test.{ts,tsx}",
-            "allowedDirectories": ["tests/**", "src/**/__tests__"]
+            "allowedDirs": ["tests/**", "src/**/__tests__"]
           }
         ]
       }
@@ -194,7 +178,7 @@ This plugin includes full TypeScript type definitions out of the box. You can im
 import type {
   FilenamePatternOptions,
   FileLocationOptions,
-  RelationshipConfig,
+  DirectoryVariableConfig,
 } from "eslint-plugin-project-layout";
 ```
 

@@ -82,3 +82,48 @@ export function matchesGlob(glob: string, filepath: string): boolean {
 
   return false;
 }
+
+/**
+ * Checks whether a given filepath matches any of the specified glob patterns.
+ */
+export function matchesAnyGlob(
+  globs: string | string[] | undefined,
+  filepath: string
+): boolean {
+  if (!globs) return false;
+  if (Array.isArray(globs)) {
+    return globs.some((glob) => matchesGlob(glob, filepath));
+  }
+  return matchesGlob(globs, filepath);
+}
+
+/**
+ * Checks whether a directory path matches a directory pattern (supports both globs and regex starting with ^).
+ */
+export function matchesDirectoryPattern(
+  pattern: string,
+  directory: string
+): boolean {
+  if (pattern.startsWith("^")) {
+    try {
+      return new RegExp(pattern).test(directory);
+    } catch {
+      return false;
+    }
+  }
+  return matchesGlob(pattern, directory);
+}
+
+/**
+ * Checks whether a directory path matches any directory pattern.
+ */
+export function matchesAnyDirectoryPattern(
+  patterns: string | string[] | undefined,
+  directory: string
+): boolean {
+  if (!patterns) return false;
+  if (Array.isArray(patterns)) {
+    return patterns.some((p) => matchesDirectoryPattern(p, directory));
+  }
+  return matchesDirectoryPattern(patterns, directory);
+}

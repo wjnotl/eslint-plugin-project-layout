@@ -1,21 +1,25 @@
 import type { Rule } from "eslint";
-import type { FilenamePatternOptions, FilenamePatternRuleItem } from "../types";
-import { matchesGlob } from "../utils/glob";
+import type {
+  FilenamePatternOptions,
+  FilenamePatternRuleItem,
+  ReplaceRule,
+} from "../types";
+import { applyCase } from "../utils/casing";
+import { escapeRegex, matchesAnyGlob } from "../utils/glob";
 import {
   getDirectoryAtLevel,
   getFilename,
   getRelativePath,
 } from "../utils/path";
-import { getComparisonValue, relationshipMatches } from "../utils/relationship";
 
 const rule: Rule.RuleModule = {
   meta: {
     type: "problem",
     docs: {
       description:
-        "Validate filename patterns and configurable filename-path relationships",
+        "Validate filename patterns and configurable directory variable tokens",
       recommended: false,
-      url: "https://github.com/USERNAME/eslint-plugin-project-layout/blob/main/docs/rules/filename-pattern.md",
+      url: "https://github.com/wjnotl/eslint-plugin-project-layout/blob/main/docs/rules/filename-pattern.md",
     },
     schema: [
       {
@@ -25,54 +29,78 @@ const rule: Rule.RuleModule = {
           basePath: {
             type: "string",
           },
+          ignoredFiles: {
+            oneOf: [
+              { type: "string" },
+              { type: "array", items: { type: "string" } },
+            ],
+          },
           patterns: {
             type: "array",
             items: {
               type: "object",
-              required: ["files", "filename"],
+              required: ["files", "filenameRegex"],
               properties: {
                 basePath: {
                   type: "string",
                 },
                 files: {
+                  oneOf: [
+                    { type: "string", minLength: 1 },
+                    {
+                      type: "array",
+                      minItems: 1,
+                      items: { type: "string", minLength: 1 },
+                    },
+                  ],
+                },
+                ignoredFiles: {
+                  oneOf: [
+                    { type: "string" },
+                    { type: "array", items: { type: "string" } },
+                  ],
+                },
+                filenameRegex: {
                   type: "string",
                   minLength: 1,
                 },
-                filename: {
+                dirs: {
                   type: "object",
-                  required: ["regex"],
-                  properties: {
-                    regex: {
-                      type: "string",
-                      minLength: 1,
-                    },
-                  },
-                  additionalProperties: false,
-                },
-                relationships: {
-                  type: "array",
-                  items: {
+                  additionalProperties: {
                     type: "object",
-                    required: ["target", "level", "comparison", "value"],
+                    required: ["level"],
                     properties: {
-                      target: {
-                        enum: ["directory"],
-                      },
                       level: {
                         type: "integer",
                         minimum: 1,
                       },
-                      comparison: {
-                        enum: ["equals", "matches"],
+                      replace: {
+                        oneOf: [
+                          {
+                            type: "object",
+                            required: ["from", "to"],
+                            properties: {
+                              from: { type: "string" },
+                              to: { type: "string" },
+                            },
+                            additionalProperties: false,
+                          },
+                          {
+                            type: "array",
+                            items: {
+                              type: "object",
+                              required: ["from", "to"],
+                              properties: {
+                                from: { type: "string" },
+                                to: { type: "string" },
+                              },
+                              additionalProperties: false,
+                            },
+                          },
+                        ],
                       },
-                      value: {
-                        enum: ["filename", "filename-stem"],
-                      },
-                      removeSuffix: {
-                        type: "array",
-                        items: {
-                          type: "string",
-                        },
+                      case: {
+                        enum: ["camel", "kebab", "pascal", "snake"],
                       },
                     },
                     additionalProperties: false,
@@ -89,11 +117,11 @@ const rule: Rule.RuleModule = {
     messages: {
       invalidFilename:
         'Filename "{{filename}}" does not match the required pattern "{{regex}}".',
-      invalidRelationship:
-        'Filename "{{filename}}" does not satisfy its relationship with directory "{{directory}}".',
-      invalidRelationshipConfig:
-        'Cannot evaluate the configured filename relationship for "{{filename}}". Check its directory level and settings.',
       invalidRegex: 'The configured filename regex "{{regex}}" is invalid.',
+      undefinedDirToken:
+        'Variable "{{token}}" in filenameRegex is not defined in "dirs".',
+      insufficientDirDepth:
+        'Cannot evaluate directory level {{level}} for "{{filename}}": directory depth is insufficient.',
     },
   },
 
@@ -102,6 +130,14 @@ const rule: Rule.RuleModule = {
       patterns: [],
     };
 
+    // Check global ignoredFiles
+    if (config.ignoredFiles) {
+      const globalFilepath = getRelativePath(context, config.basePath);
+      if (matchesAnyGlob(config.ignoredFiles, globalFilepath)) {
+        return {};
+      }
+    }
+
     let matchedPattern: FilenamePatternRuleItem | undefined;
     let matchedFilepath = "";
 
@@ -109,7 +145,15 @@ const rule: Rule.RuleModule = {
       const effectiveBasePath = pattern.basePath ?? config.basePath;
       const filepath = getRelativePath(context, effectiveBasePath);
 
-      if (matchesGlob(pattern.files, filepath)) {
+      if (matchesAnyGlob(pattern.files, filepath)) {
+        // Check pattern-specific ignoredFiles
+        if (
+          pattern.ignoredFiles &&
+          matchesAnyGlob(pattern.ignoredFiles, filepath)
+        ) {
+          continue;
+        }
+
         matchedPattern = pattern;
         matchedFilepath = filepath;
         break;
@@ -123,19 +167,85 @@ const rule: Rule.RuleModule = {
     const filepath = matchedFilepath;
     const filename = getFilename(filepath);
 
-    let filenameRegex: RegExp;
+    const rawRegex = matchedPattern.filenameRegex;
+    const tokenMatches = Array.from(rawRegex.matchAll(/\{([a-zA-Z0-9_]+)\}/g));
+    let resolvedRegex = rawRegex;
 
+    for (const match of tokenMatches) {
+      const token = match[1];
+      const dirConfig = matchedPattern.dirs?.[token];
+
+      if (!dirConfig) {
+        return {
+          Program(node) {
+            context.report({
+              node,
+              messageId: "undefinedDirToken",
+              data: { token },
+            });
+          },
+        };
+      }
+
+      const rawDir = getDirectoryAtLevel(filepath, dirConfig.level);
+      if (rawDir === null) {
+        return {
+          Program(node) {
+            context.report({
+              node,
+              messageId: "insufficientDirDepth",
+              data: {
+                level: String(dirConfig.level),
+                filename,
+              },
+            });
+          },
+        };
+      }
+
+      let processedDir = rawDir;
+
+      // Apply regex replacements
+      if (dirConfig.replace) {
+        const replaceRules: ReplaceRule[] = Array.isArray(dirConfig.replace)
+          ? dirConfig.replace
+          : [dirConfig.replace];
+
+        for (const rule of replaceRules) {
+          try {
+            processedDir = processedDir.replace(
+              new RegExp(rule.from, "g"),
+              rule.to
+            );
+          } catch {
+            // Ignore invalid regex in replace.from
+          }
+        }
+      }
+
+      // Apply casing
+      if (dirConfig.case) {
+        processedDir = applyCase(processedDir, dirConfig.case);
+      }
+
+      // Safely escape directory string before injecting into regex
+      const escapedDir = escapeRegex(processedDir);
+      resolvedRegex = resolvedRegex.replace(
+        new RegExp(`\\{${token}\\}`, "g"),
+        escapedDir
+      );
+    }
+
+    let compiledRegex: RegExp;
     try {
-      filenameRegex = new RegExp(matchedPattern.filename.regex);
+      compiledRegex = new RegExp(resolvedRegex);
     } catch {
       return {
         Program(node) {
           context.report({
             node,
             messageId: "invalidRegex",
-            data: {
-              regex: matchedPattern!.filename.regex,
-            },
+            data: { regex: resolvedRegex },
           });
         },
       };
@@ -143,63 +253,15 @@ const rule: Rule.RuleModule = {
 
     return {
       Program(node) {
-        // File name must follow the configured regex
-        if (!filenameRegex.test(filename)) {
+        if (!compiledRegex.test(filename)) {
           context.report({
             node,
             messageId: "invalidFilename",
             data: {
               filename,
-              regex: matchedPattern!.filename.regex,
+              regex: resolvedRegex,
             },
           });
-
-          // Do not run relationships on a filename that fails its basic naming convention
-          return;
-        }
-
-        // File name must satisfy each configured relationship with its directory path
-        for (const relationship of matchedPattern!.relationships ?? []) {
-          const directory = getDirectoryAtLevel(filepath, relationship.level);
-
-          if (relationship.target !== "directory" || directory === null) {
-            context.report({
-              node,
-              messageId: "invalidRelationshipConfig",
-              data: { filename },
-            });
-
-            continue;
-          }
-
-          const filenameValue = getComparisonValue(filename, relationship);
-
-          if (filenameValue === null) {
-            context.report({
-              node,
-              messageId: "invalidRelationshipConfig",
-              data: { filename },
-            });
-
-            continue;
-          }
-
-          const isMatch = relationshipMatches(
-            filenameValue,
-            directory,
-            relationship.comparison
-          );
-
-          if (!isMatch) {
-            context.report({
-              node,
-              messageId: "invalidRelationship",
-              data: {
-                filename,
-                directory,
-              },
-            });
-          }
         }
       },
     };
